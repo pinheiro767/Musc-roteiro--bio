@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Aula Prática — Sistema Muscular do Membro Superior</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <style>
+    :root{--bg:#07111f;--panel:#0f172a;--panel2:#111827;--ink:#f8fafc;--muted:#cbd5e1;--line:#334155;--accent:#38bdf8;--ok:#22c55e;--bad:#ef4444;--warn:#f59e0b}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at top,#164e63 0,#07111f 36%,#020617 100%);color:var(--ink)}
+    header{position:sticky;top:0;z-index:5;background:rgba(2,6,23,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+    .wrap{max-width:1180px;margin:auto;padding:16px}.hero{display:grid;gap:12px}
+    h1{font-size:clamp(1.35rem,4vw,2.4rem);margin:.2rem 0}.sub{color:var(--muted);line-height:1.5}
+    .tabs{display:flex;gap:8px;overflow:auto;padding:10px 0}.tab{border:1px solid var(--line);background:#0b1220;color:var(--ink);padding:10px 14px;border-radius:999px;cursor:pointer;white-space:nowrap}
+    .tab.active{background:linear-gradient(135deg,#0369a1,#0f766e);border-color:#67e8f9}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}.card{background:linear-gradient(180deg,rgba(15,23,42,.95),rgba(17,24,39,.92));border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:0 18px 40px rgba(0,0,0,.22)}
+    .muscle h3,.q h3{margin:.2rem 0 .4rem}.tag{display:inline-flex;margin:3px 4px 3px 0;padding:5px 9px;border-radius:999px;background:#172554;color:#bfdbfe;font-size:.78rem}
+    .btn{border:0;border-radius:14px;padding:10px 12px;font-weight:800;cursor:pointer;background:#e2e8f0;color:#020617;margin:4px 4px 4px 0}.btn.primary{background:linear-gradient(135deg,#38bdf8,#22c55e)}.btn.warn{background:#f59e0b}.btn.bad{background:#ef4444;color:white}.btn.ghost{background:#172033;color:white;border:1px solid var(--line)}
+    input,textarea,select{width:100%;border:1px solid var(--line);background:#020617;color:var(--ink);border-radius:14px;padding:11px;margin:5px 0 10px}textarea{min-height:100px;resize:vertical}.small{font-size:.86rem;color:var(--muted)}
+    .photos{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.thumb{position:relative}.thumb img{width:86px;height:86px;object-fit:cover;border-radius:14px;border:1px solid var(--line)}.thumb button{position:absolute;right:-5px;top:-5px;border:0;border-radius:999px;background:var(--bad);color:white;width:24px;height:24px}
+    section{display:none}.show{display:block}.answer{display:none;margin-top:8px;padding:12px;border-left:4px solid var(--ok);background:#052e16;border-radius:12px}.answer.open{display:block}
+    .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.pill{padding:7px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+    @media print{header,.tabs,.btn,.no-print{display:none!important}body{background:white;color:black}.card{break-inside:avoid;color:black;background:white;border:1px solid #999}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap hero">
+    <div>
+      <h1>🦾 Aula Prática — Sistema Muscular do Membro Superior</h1>
+      <div class="sub">Identifique músculos na peça anatômica, registre fotos, responda às perguntas e gere um PDF completo para entrega.</div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-tab="inicio">Início</button>
+      <button class="tab" data-tab="musculos">Identificação dos músculos</button>
+      <button class="tab" data-tab="observacoes">Observações e 25 perguntas</button>
+      <button class="tab" data-tab="respostas">Respostas da professora 🔒</button>
+      <button class="tab" data-tab="pdf">Gerar PDF</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="inicio" class="show">
+    <div class="card">
+      <h2>Objetivo da prática</h2>
+      <p class="sub">O aluno deverá reconhecer músculos do membro superior, relacionar forma, origem, inserção, ação, classificação funcional, fáscia, tendões, hipertrofia, atrofia e correlações clínicas.</p>
+      <div class="grid">
+        <label>Nome do grupo / aluno<input id="aluno" placeholder="Digite o nome"></label>
+        <label>Curso / turma<input id="turma" placeholder="Ex.: Medicina — Anatomia Humana"></label>
+        <label>Data<input id="data" type="date"></label>
+      </div>
+      <button class="btn primary" onclick="showTab('musculos')">Começar identificação</button>
+    </div>
+  </section>
+
+  <section id="musculos">
+    <div class="toolbar card">
+      <strong>📸 Cada músculo possui botão próprio para fotografar.</strong>
+      <span class="pill" id="photoCount">0 fotos registradas</span>
+      <button class="btn ghost" onclick="saveAll()">Salvar progresso</button>
+      <button class="btn bad" onclick="clearAll()">Limpar tudo</button>
+    </div>
+    <div id="muscleGrid" class="grid"></div>
+  </section>
+
+  <section id="observacoes">
+    <div class="card">
+      <h2>Observações gerais da peça / maquete / cadáver</h2>
+      <textarea id="obsGerais" placeholder="Descreva achados, dificuldades de identificação, relações topográficas, fáscias, tendões e observações clínicas."></textarea>
+    </div>
+    <div id="questions"></div>
+  </section>
+
+  <section id="respostas">
+    <div class="card">
+      <h2>Gabarito e comentários da professora</h2>
+      <p class="small">Área protegida. A senha não aparece para os alunos.</p>
+      <input id="senha" type="password" placeholder="Digite a senha para liberar as respostas">
+      <button class="btn warn" onclick="unlockAnswers()">Liberar respostas</button>
+      <button class="btn ghost" onclick="lockAnswers()">Bloquear novamente</button>
+      <div id="answerBox"></div>
+    </div>
+  </section>
+
+  <section id="pdf">
+    <div class="card">
+      <h2>Gerar relatório em PDF</h2>
+      <p class="sub">O PDF inclui identificação, observações, respostas das 25 perguntas e todas as fotos registradas por músculo.</p>
+      <button class="btn primary" onclick="generatePDF()">📄 Gerar PDF com fotos</button>
+      <button class="btn ghost" onclick="window.print()">Imprimir página</button>
+      <p class="small">A geração pode demorar se houver muitas fotos. Aguarde até o download iniciar.</p>
+    </div>
+  </section>
+</main>
+
+<input id="cameraInput" type="file" accept="image/*" capture="environment" multiple hidden>
+
+<script>
+const PASSWORD = "2026";
+const STORAGE_KEY = "pwa-muscular-ms-v1";
+let activeMuscleId = null;
+let state = { aluno:"", turma:"", data:"", obsGerais:"", photos:{}, answers:{} };
+
+const muscles = [
+  ["deltoide","Músculo deltoide",["largo/multipenado","abdução do ombro","nervo axilar"],"Observe fibras anterior, média e posterior; relacione com luxação do ombro e lesão do nervo axilar."],
+  ["supraespinal","Supraespinal",["manguito rotador","inicia abdução","nervo supraescapular"],"Identifique na fossa supraespinal e relacione com impacto subacromial."],
+  ["infraespinal","Infraespinal",["manguito rotador","rotação lateral","nervo supraescapular"],"Localize na fossa infraespinal e observe relação com escápula."],
+  ["redondo_menor","Redondo menor",["manguito rotador","rotação lateral","nervo axilar"],"Compare com redondo maior e delimite a região posterior do ombro."],
+  ["subescapular","Subescapular",["manguito rotador","rotação medial","nervos subescapulares"],"Identifique na face costal da escápula."],
+  ["redondo_maior","Redondo maior",["adutor","rotador medial","nervo subescapular inferior"],"Diferencie de redondo menor e latíssimo do dorso."],
+  ["peitoral_maior","Peitoral maior",["músculo largo","adução/rotação medial","nervos peitorais"],"Observe aponeurose e inserção no úmero."],
+  ["peitoral_menor","Peitoral menor",["estabilizador da escápula","profundo","nervo peitoral medial"],"Relacione com processo coracoide e vasos axilares."],
+  ["latissimo","Latíssimo do dorso",["músculo largo","extensão/adução","nervo toracodorsal"],"Observe a grande área de origem e a inserção no úmero."],
+  ["biceps","Bíceps braquial",["bíceps","fusiforme","flexão/supinação"],"Identifique cabeça longa e curta, tendão distal e aponeurose bicipital."],
+  ["braquial","Braquial",["flexor principal","profundo ao bíceps","nervo musculocutâneo"],"Compare com bíceps na flexão do cotovelo."],
+  ["coracobraquial","Coracobraquial",["medial do braço","flexão/adução","nervo musculocutâneo"],"Marque o músculo perfurado pelo nervo musculocutâneo."],
+  ["triceps","Tríceps braquial",["tríceps","extensor do cotovelo","nervo radial"],"Identifique cabeças longa, lateral e medial."],
+  ["anconeo","Ancôneo",["pequeno extensor","cotovelo","nervo radial"],"Localize próximo ao olécrano."],
+  ["pronador_redondo","Pronador redondo",["compartimento anterior","pronador","nervo mediano"],"Observe passagem do nervo mediano entre suas cabeças."],
+  ["flexor_radial_carpo","Flexor radial do carpo",["flexor","desvio radial","nervo mediano"],"Relacione com tendões anteriores do punho."],
+  ["palmar_longo","Palmar longo",["tendão superficial","aponeurose palmar","nervo mediano"],"Pode estar ausente; relacione com fáscia palmar."],
+  ["flexor_ulnar_carpo","Flexor ulnar do carpo",["flexor","desvio ulnar","nervo ulnar"],"Observe proximidade com nervo ulnar."],
+  ["flexor_superficial","Flexor superficial dos dedos",["policaudado","flexão dos dedos","nervo mediano"],"Relacione tendões com bainhas sinoviais."],
+  ["flexor_profundo","Flexor profundo dos dedos",["profundo","flexão distal","mediano/ulnar"],"Diferencie tendões para dedos mediais e laterais."],
+  ["flexor_longo_polegar","Flexor longo do polegar",["profundo","polegar","nervo interósseo anterior"],"Importante no movimento fino do polegar."],
+  ["braquiorradial","Braquiorradial",["lateral","flexor do cotovelo","nervo radial"],"Embora posterior/lateral, atua como flexor do cotovelo."],
+  ["extensor_radial_longo","Extensor radial longo do carpo",["extensor","desvio radial","nervo radial"],"Localize no compartimento posterior/lateral."],
+  ["extensor_dedos","Extensor dos dedos",["policaudado","extensão dos dedos","nervo interósseo posterior"],"Observe tendões extensores."],
+  ["extensor_ulnar_carpo","Extensor ulnar do carpo",["extensor","desvio ulnar","nervo interósseo posterior"],"Relacione com retináculo dos extensores."]
+];
+
+const questions = [
+ ["Explique a diferença entre ventre muscular, tendão e aponeurose usando um músculo do membro superior como exemplo.","Ventre é a parte contrátil; tendão fixa ao osso; aponeurose é uma lâmina tendínea. Ex.: bíceps tem ventre fusiforme, tendão distal e aponeurose bicipital."],
+ ["Escolha um músculo fusiforme do membro superior e justifique sua classificação.","Bíceps braquial: ventre alongado e espesso no centro, com tendões nas extremidades."],
+ ["Escolha um músculo largo do membro superior e explique sua importância funcional.","Peitoral maior ou latíssimo do dorso; possuem ampla origem, grande área de tração e atuam em movimentos potentes do ombro."],
+ ["Por que o deltoide pode ser considerado multipenado?","Porque apresenta feixes com diferentes direções, especialmente na porção média, favorecendo força na abdução."],
+ ["Identifique um músculo bíceps, tríceps ou policaudado no membro superior e explique o nome.","Bíceps braquial tem duas cabeças; tríceps braquial tem três; flexores/extensores dos dedos têm múltiplos tendões."],
+ ["Qual músculo inicia a abdução do ombro e qual músculo continua o movimento com maior potência?","Supraespinal inicia; deltoide continua e sustenta a abdução."],
+ ["Explique a relação entre músculo agonista e antagonista na flexão do cotovelo.","Bíceps/braquial atuam como agonistas; tríceps atua como antagonista."],
+ ["Explique a relação entre músculo agonista e antagonista na extensão do cotovelo.","Tríceps é agonista; bíceps e braquial são antagonistas."],
+ ["Diferencie hipertrofia e atrofia muscular com exemplo clínico.","Hipertrofia é aumento do volume por sobrecarga; atrofia é redução por desuso, lesão nervosa ou imobilização."],
+ ["O que pode ocorrer com um músculo após lesão do nervo motor que o inerva?","Fraqueza, paralisia, perda funcional e atrofia progressiva."],
+ ["Como as fáscias auxiliam na organização dos músculos do membro superior?","Envolvem músculos, delimitam compartimentos e formam septos intermusculares."],
+ ["Explique a importância clínica dos compartimentos fasciais.","Podem limitar edema; aumento de pressão pode causar síndrome compartimental."],
+ ["Qual a importância dos retináculos no punho?","Mantêm tendões próximos ao esqueleto, reduzem deslocamento e orientam movimentos."],
+ ["Relacione o túnel do carpo aos músculos flexores dos dedos.","Os tendões flexores passam no túnel do carpo com o nervo mediano; inflamação pode comprimir o nervo."],
+ ["Qual músculo é perfurado pelo nervo musculocutâneo?","Coracobraquial."],
+ ["Qual nervo está relacionado ao deltoide e qual alteração pode ocorrer em sua lesão?","Nervo axilar; fraqueza na abdução do ombro e alteração sensitiva lateral do ombro."],
+ ["Qual nervo está relacionado ao tríceps braquial?","Nervo radial."],
+ ["Como identificar, na prática, os músculos do manguito rotador?","Supraespinal, infraespinal, redondo menor e subescapular, localizados ao redor da escápula e estabilizadores da cabeça do úmero."],
+ ["Explique por que alguns músculos possuem vários tendões para os dedos.","Para distribuir força e permitir movimentos independentes ou coordenados dos dedos."],
+ ["Dê um exemplo de músculo sinergista no membro superior.","Braquial e braquiorradial auxiliam o bíceps na flexão do cotovelo."],
+ ["O que é unidade motora e por que ela é importante?","Neurônio motor e fibras musculares que ele inerva; determina controle de força e precisão."],
+ ["Como a irrigação muscular se relaciona com fadiga?","Atividade aumenta demanda de oxigênio e nutrientes; irrigação insuficiente favorece fadiga."],
+ ["Por que músculos da mão são importantes para movimentos finos?","Possuem controle motor preciso e permitem pinça, oposição e manipulação delicada."],
+ ["Escolha um músculo do antebraço e descreva origem, inserção e ação de forma resumida.","Resposta variável. Ex.: pronador redondo: epicôndilo medial/processo coronoide até rádio; prona o antebraço."],
+ ["Descreva uma aplicação clínica envolvendo músculo, nervo e função no membro superior.","Ex.: síndrome do túnel do carpo comprime nervo mediano, afetando músculos tenares e sensibilidade da mão."]
+];
+
+document.addEventListener("DOMContentLoaded", () => {
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
+  document.getElementById("data").valueAsDate = new Date();
+  loadAll(); renderMuscles(); renderQuestions(); renderAnswers(); bindInputs(); updatePhotoCount();
+});
+
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
+function showTab(id){document.querySelectorAll("section").forEach(s=>s.classList.remove("show"));document.getElementById(id).classList.add("show");document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===id));}
+
+function renderMuscles(){
+  muscleGrid.innerHTML = muscles.map(([id,name,tags,tips]) => `
+    <div class="card muscle">
+      <h3>${name}</h3>
+      <div>${tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+      <p class="small">${tips}</p>
+      <button class="btn primary" onclick="takePhoto('${id}')">📸 Tirar/adicionar fotos</button>
+      <button class="btn ghost" onclick="document.getElementById('note_${id}').focus()">📝 Observação</button>
+      <textarea id="note_${id}" placeholder="Observações práticas sobre ${name}: localização, ação, relações, classificação, dificuldade de identificação..."></textarea>
+      <div class="photos" id="photos_${id}"></div>
+    </div>`).join("");
+  muscles.forEach(([id])=>{document.getElementById("note_"+id).value=state.answers["note_"+id]||"";renderPhotos(id);document.getElementById("note_"+id).addEventListener("input",e=>{state.answers["note_"+id]=e.target.value;saveAll(false);});});
+}
+
+function renderQuestions(){
+  questions.innerHTML = questions.map((q,i)=>`
+    <div class="card q">
+      <h3>${i+1}. ${q[0]}</h3>
+      <textarea id="q_${i}" placeholder="Resposta do aluno..."></textarea>
+    </div>`).join("");
+  questions.forEach((_,i)=>{const el=document.getElementById("q_"+i); el.value=state.answers["q_"+i]||""; el.addEventListener("input",e=>{state.answers["q_"+i]=e.target.value;saveAll(false);});});
+}
+
+function renderAnswers(){
+  answerBox.innerHTML = questions.map((q,i)=>`
+    <div class="card">
+      <h3>${i+1}. ${q[0]}</h3>
+      <div class="answer">${q[1]}</div>
+    </div>`).join("");
+}
+
+function unlockAnswers(){
+  if(document.getElementById("senha").value===PASSWORD){document.querySelectorAll(".answer").forEach(a=>a.classList.add("open")); alert("Respostas liberadas para correção.");}
+  else alert("Senha incorreta.");
+}
+function lockAnswers(){document.querySelectorAll(".answer").forEach(a=>a.classList.remove("open"));document.getElementById("senha").value="";}
+
+function takePhoto(id){activeMuscleId=id;cameraInput.value="";cameraInput.click();}
+cameraInput.addEventListener("change", async (e)=>{
+  if(!activeMuscleId) return;
+  const files=[...e.target.files];
+  state.photos[activeMuscleId] ||= [];
+  for (const f of files){ state.photos[activeMuscleId].push(await compressImage(f)); }
+  renderPhotos(activeMuscleId); updatePhotoCount(); saveAll(false);
+});
+
+function compressImage(file){
+  return new Promise((resolve)=>{
+    const img=new Image(), reader=new FileReader();
+    reader.onload=()=>{img.onload=()=>{const canvas=document.createElement("canvas"); const max=1100; let w=img.width,h=img.height; if(w>h && w>max){h*=max/w;w=max}else if(h>max){w*=max/h;h=max} canvas.width=w;canvas.height=h;canvas.getContext("2d").drawImage(img,0,0,w,h); resolve(canvas.toDataURL("image/jpeg",0.72));}; img.src=reader.result;};
+    reader.readAsDataURL(file);
+  });
+}
+function renderPhotos(id){
+  const box=document.getElementById("photos_"+id); if(!box) return;
+  box.innerHTML=(state.photos[id]||[]).map((src,i)=>`<div class="thumb"><img src="${src}"><button title="Excluir" onclick="removePhoto('${id}',${i})">×</button></div>`).join("");
+}
+function removePhoto(id,i){state.photos[id].splice(i,1);renderPhotos(id);updatePhotoCount();saveAll(false);}
+function updatePhotoCount(){const n=Object.values(state.photos).flat().length;document.getElementById("photoCount").textContent=n+" fotos registradas";}
+
+function bindInputs(){["aluno","turma","data","obsGerais"].forEach(id=>{const el=document.getElementById(id); if(state[id]) el.value=state[id]; el.addEventListener("input",e=>{state[id]=e.target.value;saveAll(false);});});}
+function saveAll(show=true){["aluno","turma","data","obsGerais"].forEach(id=>{const el=document.getElementById(id); if(el) state[id]=el.value;});localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); if(show) alert("Progresso salvo.");}
+function loadAll(){try{state={...state,...JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}")};}catch(e){}}
+function clearAll(){if(confirm("Apagar todo o progresso deste aparelho?")){localStorage.removeItem(STORAGE_KEY);location.reload();}}
+
+async function generatePDF(){
+  saveAll(false);
+  if(!window.jspdf){alert("Biblioteca PDF carregando. Tente novamente em alguns segundos.");return;}
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:"mm",format:"a4"});
+  const pageW=210, pageH=297, margin=14; let y=16;
+  const addPageIfNeeded=(h=10)=>{if(y+h>280){doc.addPage();y=16;}};
+  const text=(str,size=11,bold=false)=>{doc.setFont("helvetica",bold?"bold":"normal");doc.setFontSize(size); const lines=doc.splitTextToSize(String(str||""),pageW-2*margin); addPageIfNeeded(lines.length*6); doc.text(lines,margin,y); y+=lines.length*6;};
+  text("Relatório — Aula Prática: Sistema Muscular do Membro Superior",16,true);
+  text("Aluno/grupo: "+(state.aluno||"")); text("Turma: "+(state.turma||"")); text("Data: "+(state.data||""));
+  y+=3; text("Observações gerais",13,true); text(state.obsGerais||"Sem observações gerais registradas.");
+  y+=3; text("Respostas das 25 perguntas",14,true);
+  questions.forEach((q,i)=>{addPageIfNeeded(20);text((i+1)+". "+q[0],11,true);text(state.answers["q_"+i]||"Sem resposta.");});
+  doc.addPage(); y=16; text("Registros fotográficos por músculo",14,true);
+  for (const [id,name] of muscles){
+    const note=state.answers["note_"+id]||""; const arr=state.photos[id]||[];
+    if(!note && arr.length===0) continue;
+    addPageIfNeeded(30); text(name,12,true); if(note) text("Observação: "+note,10,false);
+    for(const src of arr){
+      addPageIfNeeded(70);
+      try{doc.addImage(src,"JPEG",margin,y,58,58); y+=64;}catch(e){text("[Imagem não pôde ser inserida]",9);}
+    }
+  }
+  doc.save("relatorio_sistema_muscular_membro_superior.pdf");
+}
+</script>
+</body>
+</html>
